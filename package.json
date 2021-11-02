@@ -3,19 +3,28 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@blueprintjs/core": "^3.51.3",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "dotenv": "^10.0.0",
+    "env-cmd": "^10.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-map-gl": "5.2.5",
+    "react-responsive": "^9.0.0-beta.4",
     "react-scripts": "4.0.3",
+    "styled-components": "^5.3.3",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "env-cmd -f .env.local react-scripts start",
+    "start:production": "env-cmd -f .env.production react-scripts start",
+    "build:local": "env-cmd -f .env.local react-scripts build",
+    "build:production": "env-cmd -f .env.production react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy:production": "npm run build:production && aws --profile virunga s3 sync build/ s3://smart-carte-app && aws --profile virunga cloudfront create-invalidation --distribution-id E3O22P0ATRY8V5 --paths '/*'"
   },
   "eslintConfig": {
     "extends": [

@@ -1,5 +1,6 @@
 import React from "react";
 import MapGL from "react-map-gl";
+import { Button, HTMLSelect, RangeSlider } from "@blueprintjs/core";
 
 import useLocalStorage from "../../../../hooks/useLocalStorage";
 
@@ -7,6 +8,7 @@ import { StyledChangeMap } from "./styles";
 import useCoordinates from "./hooks/useCoordinates";
 import useMapWidth from "./hooks/useMapWidth";
 import BasemapButton from "./components/BasemapButton";
+import InfoTab from "./components/InfoTab";
 
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
 const defaultStyle = "mapbox://styles/mapbox/satellite-v8";
@@ -18,6 +20,7 @@ const ChangeMap = () => {
   const [mapStyle, setMapStyle] = useLocalStorage("mapstyle", defaultStyle);
   const mapContainerRef = React.useRef(null);
   const mapRef = React.useRef(null);
+  const [dateRange, setDateRange] = React.useState([0, 10]);
   const [viewport, setViewport] = React.useState({
     width: 10,
     height: 10,
@@ -58,15 +61,56 @@ const ChangeMap = () => {
     });
   }
 
+  const minDateValue = 0;
+  const maxDateValue = 10;
+
+  function getDate(value) {
+    const startDate = new Date(2016, 0, 1);
+    const diffMillis = (value / 10) * (new Date() - startDate);
+    return new Date(startDate.getTime() + diffMillis);
+  }
+
   return (
     <StyledChangeMap ref={mapContainerRef} mapStyle={mapStyle}>
+      <div className="filter-wrapper">
+        <HTMLSelect className="index-select">
+          <option value="evi">EVI</option>
+          <option value="ndvi">NDVI</option>
+          <option value="savi">SAVI</option>
+          <option value="wdvi">WDVI</option>
+        </HTMLSelect>
+        <RangeSlider
+          className="date-slider"
+          intent="primary"
+          min={minDateValue}
+          max={maxDateValue}
+          stepSize={1}
+          labelStepSize={1}
+          value={dateRange}
+          onChange={(newDateRange) => setDateRange(newDateRange)}
+          labelRenderer={(value) => {
+            console.log(value);
+            const currDate = getDate(value);
+            let shortMonth = currDate.toLocaleString("en-us", {
+              month: "short",
+            });
+            const shortYear = currDate.getFullYear().toString().substr(-2);
+            return `${shortMonth} '${shortYear}`;
+          }}
+        />
+        <Button className="run-button" icon="play" intent="none">
+          RUN
+        </Button>
+      </div>
       <BasemapButton mapStyle={mapStyle} setMapStyle={setMapStyle} />
+      <InfoTab />
       <MapGL
         ref={mapRef}
         mapboxApiAccessToken={MAPBOX_TOKEN}
         {...viewport}
         mapStyle={mapStyle}
         dragRotate={false}
+        attributionControl={false}
         onViewportChange={(newViewport) => onViewportChange(newViewport)}
         onClick={() => {}}
         onLoad={() => {

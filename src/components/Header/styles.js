@@ -15,7 +15,15 @@ export const StyledHeader = styled.header`
   color: #f7f7ff;
   text-align: left;
 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
   .header-title {
     font-size: 1.4em;
+  }
+
+  .logout-button {
+    margin-left: 20px;
   }
 `;

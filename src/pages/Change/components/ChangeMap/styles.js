@@ -5,6 +5,13 @@ export const StyledChangeMap = styled.div`
   position: relative;
   overflow: hidden;
 
+  .results-spinner {
+    z-index: 99;
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+  }
+
   .filter-wrapper {
     z-index: 10;
     position: absolute;

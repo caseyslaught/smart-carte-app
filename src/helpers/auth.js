@@ -8,6 +8,7 @@ export const useUser = () => {
       const currentUserStr = localStorage.getItem("current_user");
       if (currentUserStr) {
         const currentUser = JSON.parse(currentUserStr);
+
         // todo: validate user
         setUser(currentUser);
       } else {

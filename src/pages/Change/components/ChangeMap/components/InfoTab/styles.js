@@ -36,6 +36,12 @@ export const StyledInfoTab = styled.div`
       margin: 10px 0px 5px 0px;
     }
 
+    .info-instructions {
+      font-size: 1em;
+      color: #555555;
+      margin-bottom: 5px;
+    }
+
     .info-details-wrapper {
       text-align: left;
 

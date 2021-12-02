@@ -39,8 +39,6 @@ const LoginPage = () => {
               Password: values.password,
             });
 
-            console.log(values.email, values.password);
-
             var userPool = new CognitoUserPool({
               UserPoolId: process.env.REACT_APP_AWS_USER_POOL_ID,
               ClientId: process.env.REACT_APP_AWS_CLIENT_ID,
@@ -51,8 +49,6 @@ const LoginPage = () => {
               Pool: userPool,
             });
 
-            // still save the tokens in localStorage!
-
             cognitoUser.authenticateUser(authenticationDetails, {
               onSuccess: function (result) {
                 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -62,13 +58,23 @@ const LoginPage = () => {
                   },
                 });
 
+                localStorage.setItem(
+                  "current_user",
+                  JSON.stringify({
+                    email: values.email,
+                    accessToken: result.getAccessToken().getJwtToken(),
+                    refreshToken: result.getRefreshToken().getToken(),
+                    idToken: result.getIdToken().getJwtToken(),
+                  })
+                );
+
                 setSubmitting(false);
                 console.log("success!");
               },
 
               onFailure: function (err) {
                 setSubmitting(false);
-                alert(err.message || JSON.stringify(err));
+                alert("Incorrect email + password combination");
               },
             });
           }}

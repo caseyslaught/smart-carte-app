@@ -1,12 +1,13 @@
 import React from "react";
 import MapGL from "react-map-gl";
-import { Button, HTMLSelect, RangeSlider } from "@blueprintjs/core";
+import { Button, HTMLSelect, RangeSlider, Spinner } from "@blueprintjs/core";
 
 import useLocalStorage from "../../../../hooks/useLocalStorage";
 
 import { StyledChangeMap } from "./styles";
 import useCoordinates from "./hooks/useCoordinates";
 import useMapWidth from "./hooks/useMapWidth";
+import useResults from "./hooks/useResults";
 import BasemapButton from "./components/BasemapButton";
 import InfoTab from "./components/InfoTab";
 
@@ -14,6 +15,7 @@ const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
 const defaultStyle = "mapbox://styles/mapbox/satellite-v8";
 
 const ChangeMap = () => {
+  const [results, isResultsLoading, fetchResults] = useResults();
   const [isMapLoaded, setIsMapLoaded] = React.useState(false);
   const mapWidth = useMapWidth();
   const [coordinates, setCoordinates] = useCoordinates();
@@ -72,8 +74,10 @@ const ChangeMap = () => {
 
   return (
     <StyledChangeMap ref={mapContainerRef} mapStyle={mapStyle}>
+      {isResultsLoading && <Spinner className="results-spinner" />}
+
       <div className="filter-wrapper">
-        <HTMLSelect className="index-select">
+        <HTMLSelect className="index-select" disabled={isResultsLoading}>
           <option value="evi">EVI</option>
           <option value="ndvi">NDVI</option>
           <option value="savi">SAVI</option>
@@ -87,9 +91,9 @@ const ChangeMap = () => {
           stepSize={1}
           labelStepSize={1}
           value={dateRange}
+          disabled={isResultsLoading}
           onChange={(newDateRange) => setDateRange(newDateRange)}
           labelRenderer={(value) => {
-            console.log(value);
             const currDate = getDate(value);
             let shortMonth = currDate.toLocaleString("en-us", {
               month: "short",
@@ -98,12 +102,20 @@ const ChangeMap = () => {
             return `${shortMonth} '${shortYear}`;
           }}
         />
-        <Button className="run-button" icon="play" intent="none">
+        <Button
+          className="run-button"
+          icon="play"
+          intent="none"
+          disabled={isResultsLoading}
+          onClick={() => {
+            fetchResults();
+          }}
+        >
           RUN
         </Button>
       </div>
       <BasemapButton mapStyle={mapStyle} setMapStyle={setMapStyle} />
-      <InfoTab />
+      <InfoTab results={results} />
       <MapGL
         ref={mapRef}
         mapboxApiAccessToken={MAPBOX_TOKEN}

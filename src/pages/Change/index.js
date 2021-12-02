@@ -1,5 +1,4 @@
 import React from "react";
-import {} from "@blueprintjs/core";
 
 import ChangeMap from "./components/ChangeMap";
 

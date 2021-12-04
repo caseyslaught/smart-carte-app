@@ -10,17 +10,20 @@ const Header = () => {
     <StyledHeaderWrapper>
       <StyledHeader>
         <div className="header-title">Smart Carte</div>
-        <div className="header-account">
-          <span>{currentUser.email}</span>
-          <Icon
-            className="logout-button"
-            icon="log-out"
-            iconSize={15}
-            onClick={() => {
-              localStorage.clear();
-            }}
-          />
-        </div>
+        {currentUser && (
+          <div className="header-account">
+            <span>{currentUser.email}</span>
+            <Icon
+              className="logout-button"
+              icon="log-out"
+              iconSize={15}
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = "/login";
+              }}
+            />
+          </div>
+        )}
       </StyledHeader>
     </StyledHeaderWrapper>
   );

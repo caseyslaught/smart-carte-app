@@ -1,9 +1,11 @@
 import React from "react";
 
+import BasemapButton from "../BasemapButton";
+
 import { StyledInfoTab } from "./styles";
 
-const InfoTab = ({ results }) => {
-  if (!results) {
+const InfoTab = ({ results, mapStyle, setMapStyle }) => {
+  if (!results || !results.ok) {
     return (
       <StyledInfoTab>
         <div className="info-tab">
@@ -13,6 +15,8 @@ const InfoTab = ({ results }) => {
             3) Click run and wait for results
           </div>
         </div>
+
+        <BasemapButton mapStyle={mapStyle} setMapStyle={setMapStyle} />
       </StyledInfoTab>
     );
   }
@@ -25,7 +29,13 @@ const InfoTab = ({ results }) => {
       <div className="info-tab">
         <div className="info-title">{results.index}</div>
         <div className="info-date-range">
-          {start.getMonth()} {start.getFullYear()} - {end.getMonth()}{" "}
+          {start.toLocaleString("en-us", {
+            month: "short",
+          })}{" "}
+          {start.getFullYear()} -{" "}
+          {end.toLocaleString("en-us", {
+            month: "short",
+          })}{" "}
           {end.getFullYear()}
         </div>
 
@@ -33,18 +43,23 @@ const InfoTab = ({ results }) => {
           <div className="info-subtitle">Study area</div>
           <div className="info-detail">{results.areaHa} hectares</div>
           <div className="info-detail">
-            {results.cloudCoverPct}% cloud cover
+            {((100 * results.cloudHa) / results.areaHa).toFixed(2)}% cloud cover
           </div>
         </div>
 
         <div className="info-hline" />
         <div className="info-subtitle">Net EVI change</div>
-        <div className="info-net">{results.changePct}%</div>
+        <div
+          className={`info-net ${results.indexChange >= 0 ? "green" : "red"}`}
+        >
+          {(100 * results.indexChange).toFixed(2)}%
+        </div>
 
         {/* 
         <Icon className="expand-icon" icon="chevron-down" size={12} />
         */}
       </div>
+      <BasemapButton mapStyle={mapStyle} setMapStyle={setMapStyle} />
     </StyledInfoTab>
   );
 };

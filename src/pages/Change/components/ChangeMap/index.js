@@ -8,13 +8,12 @@ import { StyledChangeMap } from "./styles";
 import useCoordinates from "./hooks/useCoordinates";
 import useMapWidth from "./hooks/useMapWidth";
 import useResults from "./hooks/useResults";
-import BasemapButton from "./components/BasemapButton";
 import InfoTab from "./components/InfoTab";
 
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
 const defaultStyle = "mapbox://styles/mapbox/satellite-v8";
 
-const ChangeMap = () => {
+const ChangeMap = ({ addToast }) => {
   const [results, isResultsLoading, fetchResults] = useResults();
   const [isMapLoaded, setIsMapLoaded] = React.useState(false);
   const mapWidth = useMapWidth();
@@ -22,13 +21,33 @@ const ChangeMap = () => {
   const [mapStyle, setMapStyle] = useLocalStorage("mapstyle", defaultStyle);
   const mapContainerRef = React.useRef(null);
   const mapRef = React.useRef(null);
-  const [dateRange, setDateRange] = React.useState([0, 10]);
   const [viewport, setViewport] = React.useState({
     width: 10,
     height: 10,
     maxZoom: 18,
     ...coordinates,
   });
+
+  const indices = [
+    "ari",
+    "arvi",
+    "evi",
+    "exgi",
+    "gndvi",
+    "ndvi",
+    "ndwi",
+    "psri",
+  ];
+  const minDateValue = 0;
+  const maxDateValue = 10;
+  const [dateRange, setDateRange] = React.useState([
+    minDateValue,
+    maxDateValue,
+  ]);
+  const [startDate, setStartDate] = React.useState(getDate(minDateValue));
+  const [endDate, setEndDate] = React.useState(getDate(maxDateValue));
+  const [bounds, setBounds] = React.useState();
+  const [index, setIndex] = React.useState(indices[0]);
 
   // reinitialize viewport to capture map container dimensions
   // without this, the map will not fill the space without a window resize
@@ -51,7 +70,23 @@ const ChangeMap = () => {
     }));
   }, [mapWidth]);
 
+  React.useEffect(() => {
+    if (results && !results.ok) {
+      addToast(results.message, "issue", "danger");
+    }
+  }, [results, addToast]);
+
   function onViewportChange(newViewport) {
+    if (mapRef.current) {
+      const bbox = mapRef.current.getMap().getBounds();
+      // fixme: this doesn't seem to change when window changes
+      if (bbox) {
+        setBounds(
+          `${bbox._sw.lng},${bbox._sw.lat},${bbox._ne.lng},${bbox._ne.lat}`
+        );
+      }
+    }
+
     setViewport((oldViewport) => ({
       ...oldViewport,
       ...newViewport,
@@ -63,12 +98,11 @@ const ChangeMap = () => {
     });
   }
 
-  const minDateValue = 0;
-  const maxDateValue = 10;
-
   function getDate(value) {
-    const startDate = new Date(2016, 0, 1);
-    const diffMillis = (value / 10) * (new Date() - startDate);
+    const startDate = new Date(2017, 0, 1);
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() - 30);
+    const diffMillis = (value / 10) * (endDate - startDate);
     return new Date(startDate.getTime() + diffMillis);
   }
 
@@ -77,11 +111,18 @@ const ChangeMap = () => {
       {isResultsLoading && <Spinner className="results-spinner" />}
 
       <div className="filter-wrapper">
-        <HTMLSelect className="index-select" disabled={isResultsLoading}>
-          <option value="evi">EVI</option>
-          <option value="ndvi">NDVI</option>
-          <option value="savi">SAVI</option>
-          <option value="wdvi">WDVI</option>
+        <HTMLSelect
+          className="index-select"
+          disabled={isResultsLoading}
+          onChange={(e) => {
+            setIndex(e.currentTarget.value);
+          }}
+        >
+          {indices.map((i) => (
+            <option key={i} value={i}>
+              {i.toUpperCase()}
+            </option>
+          ))}
         </HTMLSelect>
         <RangeSlider
           className="date-slider"
@@ -92,7 +133,11 @@ const ChangeMap = () => {
           labelStepSize={1}
           value={dateRange}
           disabled={isResultsLoading}
-          onChange={(newDateRange) => setDateRange(newDateRange)}
+          onChange={(newDateRange) => {
+            setDateRange(newDateRange);
+            setStartDate(getDate(newDateRange[0]));
+            setEndDate(getDate(newDateRange[1]));
+          }}
           labelRenderer={(value) => {
             const currDate = getDate(value);
             let shortMonth = currDate.toLocaleString("en-us", {
@@ -108,14 +153,23 @@ const ChangeMap = () => {
           intent="none"
           disabled={isResultsLoading}
           onClick={() => {
-            fetchResults();
+            addToast(
+              "Change detection task started. This may take up to two minutes.",
+              "confirm",
+              "success"
+            );
+
+            fetchResults(bounds, startDate, endDate, index);
           }}
         >
           RUN
         </Button>
       </div>
-      <BasemapButton mapStyle={mapStyle} setMapStyle={setMapStyle} />
-      <InfoTab results={results} />
+      <InfoTab
+        results={results}
+        mapStyle={mapStyle}
+        setMapStyle={setMapStyle}
+      />
       <MapGL
         ref={mapRef}
         mapboxApiAccessToken={MAPBOX_TOKEN}

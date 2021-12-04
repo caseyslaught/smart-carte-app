@@ -25,5 +25,6 @@ export const StyledHeader = styled.header`
 
   .logout-button {
     margin-left: 20px;
+    cursor: pointer;
   }
 `;

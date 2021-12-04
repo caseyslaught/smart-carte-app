@@ -43,17 +43,4 @@ export const StyledChangeMap = styled.div`
       margin-bottom: 10px;
     }
   }
-
-  .basemap-button {
-    z-index: 10;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    margin: 0px 20px 30px 0px;
-    color: ${(props) =>
-      props.mapStyle === "mapbox://styles/mapbox/satellite-v8"
-        ? "whitesmoke"
-        : "#555555"};
-    cursor: pointer;
-  }
 `;

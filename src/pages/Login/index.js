@@ -1,7 +1,6 @@
 import React from "react";
 import { Button, InputGroup } from "@blueprintjs/core";
 import { Formik, Form, Field } from "formik";
-import AWS from "aws-sdk";
 import {
   AuthenticationDetails,
   CognitoUser,
@@ -12,9 +11,7 @@ import { validateEmail } from "../../helpers/text";
 
 import { StyledLoginPage } from "./styles";
 
-const userPoolUrl = `cognito-idp.us-east-1.amazonaws.com/${process.env.REACT_APP_AWS_USER_POOL_ID}`;
-
-const LoginPage = () => {
+const LoginPage = ({ addToast }) => {
   const [buttonDisabled, setButtonDisabled] = React.useState(true);
 
   return (
@@ -50,14 +47,7 @@ const LoginPage = () => {
             });
 
             cognitoUser.authenticateUser(authenticationDetails, {
-              onSuccess: function (result) {
-                AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-                  IdentityPoolId: process.env.REACT_APP_AWS_IDENTITY_POOL_ID,
-                  Logins: {
-                    [userPoolUrl]: result.getIdToken().getJwtToken(),
-                  },
-                });
-
+              onSuccess: (result) => {
                 localStorage.setItem(
                   "current_user",
                   JSON.stringify({
@@ -69,12 +59,16 @@ const LoginPage = () => {
                 );
 
                 setSubmitting(false);
-                console.log("success!");
+                window.location.href = "/";
               },
 
-              onFailure: function (err) {
+              onFailure: (error) => {
                 setSubmitting(false);
-                alert("Incorrect email + password combination");
+                addToast(
+                  "Login failed with given credentials",
+                  "log-in",
+                  "danger"
+                );
               },
             });
           }}

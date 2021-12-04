@@ -6,7 +6,6 @@ export const StyledInfoTab = styled.div`
   top: 0;
   right: 0;
   margin: 20px 20px 0px 0px;
-
   width: 250px;
 
   .info-tab {
@@ -66,6 +65,13 @@ export const StyledInfoTab = styled.div`
 
     .info-net {
       font-size: 1.4em;
+    }
+
+    .green {
+      color: #068a19;
+    }
+
+    .red {
       color: #ab0f07;
     }
 

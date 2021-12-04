@@ -4,10 +4,10 @@ import ChangeMap from "./components/ChangeMap";
 
 import { StyledChangePage } from "./styles";
 
-const ChangePage = () => {
+const ChangePage = ({ addToast }) => {
   return (
     <StyledChangePage>
-      <ChangeMap />
+      <ChangeMap addToast={addToast} />
     </StyledChangePage>
   );
 };

@@ -8,9 +8,6 @@ const useResults = () => {
   const fetchResults = async (bounds, startDate, endDate, index) => {
     setIsLoading(true);
 
-    console.log(startDate, endDate);
-    console.log(index, bounds);
-
     const start = startDate.toISOString();
     const end = endDate.toISOString();
 

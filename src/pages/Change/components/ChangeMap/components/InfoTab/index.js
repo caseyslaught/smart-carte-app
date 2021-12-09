@@ -48,7 +48,9 @@ const InfoTab = ({ results, mapStyle, setMapStyle }) => {
         </div>
 
         <div className="info-hline" />
-        <div className="info-subtitle">Net EVI change</div>
+        <div className="info-subtitle">
+          Net {results.index.toUpperCase()} change
+        </div>
         <div
           className={`info-net ${results.indexChange >= 0 ? "green" : "red"}`}
         >
